@@ -12,10 +12,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, X, Search, CalendarIcon, ChevronsUpDown } from 'lucide-react';
+import { PlusCircle, X, Search, CalendarIcon, ChevronsUpDown, ChevronDown, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { products as initialProducts, customers as initialCustomers, sellers as initialSellers, cashiers as initialCashiers } from '@/lib/data';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 
 const PRODUCTS_STORAGE_KEY = 'divine-glow-products';
 const CUSTOMERS_STORAGE_KEY = 'divine-glow-customers';
@@ -38,6 +40,8 @@ export default function SalesPage() {
     const [saleDate, setSaleDate] = useState<Date | undefined>(new Date());
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [openProductPopover, setOpenProductPopover] = useState(false);
+    const [openSaleId, setOpenSaleId] = useState<string | null>(null);
+
 
     useEffect(() => {
         const loadData = (key: string, setter: (data: any) => void, initialData: any) => {
@@ -129,7 +133,7 @@ export default function SalesPage() {
             total: saleTotal,
         };
         
-        updateSales([...sales, newSale]);
+        updateSales([newSale, ...sales]);
 
         toast({ title: "Venta Registrada", description: `La venta se ha registrado con éxito.`, });
         
@@ -140,6 +144,15 @@ export default function SalesPage() {
         setSelectedCashier('');
         setSaleDate(new Date());
     }
+
+    const getNameById = (id: string, list: {id: string, name: string}[]) => {
+        return list.find(item => item.id === id)?.name || 'N/A';
+    }
+
+    const toggleSaleDetails = (saleId: string) => {
+        setOpenSaleId(prevId => (prevId === saleId ? null : saleId));
+    };
+
 
     return (
         <div className="flex flex-col gap-6">
@@ -297,7 +310,89 @@ export default function SalesPage() {
                     </Card>
                 </div>
             </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Historial de Ventas Registradas</CardTitle>
+                    <CardDescription>Lista de todas las ventas creadas manualmente.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[60px]"></TableHead>
+                                <TableHead>Venta ID</TableHead>
+                                <TableHead>Cliente</TableHead>
+                                <TableHead className="hidden md:table-cell">Vendedor</TableHead>
+                                <TableHead className="hidden lg:table-cell">Cajero</TableHead>
+                                <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                                <TableHead className="text-right">Total</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        {sales.map((sale) => (
+                           <Collapsible asChild key={sale.id} open={openSaleId === sale.id} onOpenChange={() => toggleSaleDetails(sale.id)}>
+                                <TableBody>
+                                    <TableRow>
+                                         <TableCell>
+                                            <CollapsibleTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="w-9 p-0">
+                                                    {openSaleId === sale.id ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                                    <span className="sr-only">Toggle Details</span>
+                                                </Button>
+                                            </CollapsibleTrigger>
+                                        </TableCell>
+                                        <TableCell className="font-mono text-xs">#{sale.id.split('-')[1]}</TableCell>
+                                        <TableCell>{getNameById(sale.customerId, customers)}</TableCell>
+                                        <TableCell className="hidden md:table-cell">{getNameById(sale.sellerId, sellers)}</TableCell>
+                                        <TableCell className="hidden lg:table-cell">{getNameById(sale.cashierId, cashiers)}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{sale.date}</TableCell>
+                                        <TableCell className="text-right">S/{sale.total.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                     <CollapsibleContent asChild>
+                                        <TableRow>
+                                            <TableCell colSpan={7} className="p-0">
+                                                <div className="p-4 bg-muted/50">
+                                                <h4 className="font-semibold mb-2">Detalles de la Venta:</h4>
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Producto</TableHead>
+                                                            <TableHead>Categoría</TableHead>
+                                                            <TableHead className="text-right">Cantidad</TableHead>
+                                                            <TableHead className="text-right">Precio Unit.</TableHead>
+                                                            <TableHead className="text-right">Subtotal</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                    {sale.items.map(item => (
+                                                        <TableRow key={item.productId}>
+                                                            <TableCell>{item.productName}</TableCell>
+                                                            <TableCell>{item.category}</TableCell>
+                                                            <TableCell className="text-right">{item.quantity}</TableCell>
+                                                            <TableCell className="text-right">S/{item.price.toFixed(2)}</TableCell>
+                                                            <TableCell className="text-right">S/{(item.price * item.quantity).toFixed(2)}</TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                    </TableBody>
+                                                </Table>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    </CollapsibleContent>
+                                </TableBody>
+                           </Collapsible>
+                        ))}
+                    </Table>
+                     {sales.length === 0 && (
+                        <div className="text-center p-8 text-muted-foreground">
+                            No hay ventas registradas manualmente todavía.
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
         </div>
     );
 }
 
+    
