@@ -10,6 +10,7 @@ export const products: Product[] = [
     stock: 25,
     lowStockThreshold: 10,
     image: 'https://placehold.co/400x400.png',
+    category: 'Cuidado de la piel',
   },
   {
     id: 'prod-002',
@@ -19,6 +20,7 @@ export const products: Product[] = [
     stock: 8,
     lowStockThreshold: 10,
     image: 'https://placehold.co/400x400.png',
+    category: 'Cuidado de la piel',
   },
   {
     id: 'prod-003',
@@ -28,6 +30,7 @@ export const products: Product[] = [
     stock: 50,
     lowStockThreshold: 15,
     image: 'https://placehold.co/400x400.png',
+    category: 'Cuidado de la piel',
   },
   {
     id: 'prod-004',
@@ -37,6 +40,7 @@ export const products: Product[] = [
     stock: 12,
     lowStockThreshold: 10,
     image: 'https://placehold.co/400x400.png',
+    category: 'Cuidado de la piel',
   },
   {
     id: 'prod-005',
@@ -46,6 +50,7 @@ export const products: Product[] = [
     stock: 5,
     lowStockThreshold: 5,
     image: 'https://placehold.co/400x400.png',
+    category: 'Cuidado de la piel',
   },
 ];
 

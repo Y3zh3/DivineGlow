@@ -1,7 +1,7 @@
 
 'use client';
 import { products as initialProducts } from '@/lib/data';
-import type { Product } from '@/lib/types';
+import type { Product, ProductCategory } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -40,8 +40,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const PRODUCTS_STORAGE_KEY = 'divine-glow-products';
+
+const categories: ProductCategory[] = ['Perfumes', 'Maquillaje', 'Cuidado de la piel', 'Accesorios y herramientas'];
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -58,6 +61,7 @@ export default function ProductsPage() {
     price: '',
     stock: '',
     image: '',
+    category: 'Cuidado de la piel' as ProductCategory,
   });
   
   useEffect(() => {
@@ -86,12 +90,22 @@ export default function ProductsPage() {
     setNewProduct(prev => ({ ...prev, [id]: value }));
   };
 
+  const handleCategoryChange = (value: ProductCategory) => {
+    setNewProduct(prev => ({...prev, category: value}));
+  }
+
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (selectedProduct) {
         const { id, value } = e.target;
         setSelectedProduct({ ...selectedProduct, [id]: value });
     }
   };
+
+  const handleEditCategoryChange = (value: ProductCategory) => {
+    if (selectedProduct) {
+        setSelectedProduct({...selectedProduct, category: value});
+    }
+  }
 
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.price && newProduct.stock) {
@@ -103,9 +117,10 @@ export default function ProductsPage() {
         stock: parseInt(newProduct.stock, 10),
         lowStockThreshold: 10, // Default value
         image: newProduct.image || 'https://placehold.co/400x400.png',
+        category: newProduct.category,
       };
       updateProducts([productToAdd, ...products]);
-      setNewProduct({ name: '', description: '', price: '', stock: '', image: '' });
+      setNewProduct({ name: '', description: '', price: '', stock: '', image: '', category: 'Cuidado de la piel' });
       setIsAddProductDialogOpen(false);
     } else {
       alert('Por favor, completa todos los campos requeridos.');
@@ -183,6 +198,19 @@ export default function ProductsPage() {
                   <Textarea id="description" value={newProduct.description} onChange={handleInputChange} className="col-span-3" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="category" className="text-right">
+                        Categoría
+                    </Label>
+                    <Select onValueChange={handleCategoryChange} defaultValue={newProduct.category}>
+                        <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder="Selecciona una categoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="price" className="text-right">
                     Precio
                   </Label>
@@ -220,6 +248,7 @@ export default function ProductsPage() {
                   <span className="sr-only">Imagen</span>
                 </TableHead>
                 <TableHead>Nombre</TableHead>
+                <TableHead className="hidden md:table-cell">Categoría</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="hidden md:table-cell">Precio</TableHead>
                 <TableHead className="hidden sm:table-cell">Stock</TableHead>
@@ -240,6 +269,7 @@ export default function ProductsPage() {
                     />
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell className="hidden md:table-cell">{product.category}</TableCell>
                   <TableCell>
                     <Badge variant={getStockVariant(product.stock, product.lowStockThreshold)}>
                       {getStockText(product.stock, product.lowStockThreshold)}
@@ -307,38 +337,51 @@ export default function ProductsPage() {
               Actualiza los detalles del producto. Haz clic en guardar cuando termines.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          {selectedProduct && <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">
                 Nombre
                 </Label>
-                <Input id="name" value={selectedProduct?.name || ''} onChange={handleEditInputChange} className="col-span-3" />
+                <Input id="name" value={selectedProduct.name} onChange={handleEditInputChange} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="description" className="text-right">
                 Descripción
                 </Label>
-                <Textarea id="description" value={selectedProduct?.description || ''} onChange={handleEditInputChange} className="col-span-3" />
+                <Textarea id="description" value={selectedProduct.description} onChange={handleEditInputChange} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="category" className="text-right">
+                    Categoría
+                </Label>
+                <Select onValueChange={handleEditCategoryChange} defaultValue={selectedProduct.category}>
+                    <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                    </SelectContent>
+                </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="price" className="text-right">
                 Precio
                 </Label>
-                <Input id="price" type="number" value={selectedProduct?.price || ''} onChange={handleEditInputChange} className="col-span-3" />
+                <Input id="price" type="number" value={selectedProduct.price} onChange={handleEditInputChange} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="stock" className="text-right">
                 Stock
                 </Label>
-                <Input id="stock" type="number" value={selectedProduct?.stock || ''} onChange={handleEditInputChange} className="col-span-3" />
+                <Input id="stock" type="number" value={selectedProduct.stock} onChange={handleEditInputChange} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="image" className="text-right">
                 URL de Imagen
                 </Label>
-                <Input id="image" value={selectedProduct?.image || ''} onChange={handleEditInputChange} className="col-span-3" />
+                <Input id="image" value={selectedProduct.image} onChange={handleEditInputChange} className="col-span-3" />
             </div>
-          </div>
+          </div>}
           <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" onClick={() => setSelectedProduct(null)}>Cancelar</Button>

@@ -1,6 +1,8 @@
 
 export type UserRole = 'admin' | 'seller' | 'warehouse' | 'cajero';
 
+export type ProductCategory = 'Perfumes' | 'Maquillaje' | 'Cuidado de la piel' | 'Accesorios y herramientas';
+
 export type User = {
   name: string;
   role: UserRole;
@@ -14,6 +16,7 @@ export type Product = {
   stock: number;
   lowStockThreshold: number;
   image: string;
+  category: ProductCategory;
 };
 
 export type Customer = {
