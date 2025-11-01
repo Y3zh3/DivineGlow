@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { customers as initialCustomers, sellers as initialSellers, cashiers as initialCashiers, orders as initialOrders } from '@/lib/data';
+import { customers as initialCustomers, sellers as initialSellers, cashiers as initialCashiers, orders as initialOrders, products as initialProducts } from '@/lib/data';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 
@@ -16,11 +16,13 @@ const SELLERS_STORAGE_KEY = 'divine-glow-sellers';
 const CASHIERS_STORAGE_KEY = 'divine-glow-cashiers';
 const SALES_STORAGE_KEY = 'divine-glow-sales';
 const ORDERS_STORAGE_KEY = 'divine-glow-orders';
+const PRODUCTS_STORAGE_KEY = 'divine-glow-products';
 
 // We'll combine manual sales and paid POS orders into one type for display
 type CombinedSale = (Sale & { sourceType: 'Manual' }) | (Order & { sourceType: 'POS' });
 
 export default function SalesPage() {
+    const [products, setProducts] = useState<Product[]>([]);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [cashiers, setCashiers] = useState<Cashier[]>([]);
@@ -39,6 +41,7 @@ export default function SalesPage() {
             }
         };
         
+        loadData(PRODUCTS_STORAGE_KEY, setProducts, initialProducts);
         loadData(CUSTOMERS_STORAGE_KEY, setCustomers, initialCustomers);
         loadData(SELLERS_STORAGE_KEY, setSellers, initialSellers);
         loadData(CASHIERS_STORAGE_KEY, setCashiers, initialCashiers);
@@ -96,7 +99,8 @@ export default function SalesPage() {
                                 <TableHead className="w-[60px]"></TableHead>
                                 <TableHead>ID</TableHead>
                                 <TableHead>Cliente</TableHead>
-                                <TableHead className="hidden md:table-cell">Vendedor/Cajero</TableHead>
+                                <TableHead className="hidden md:table-cell">Vendedor</TableHead>
+                                <TableHead className="hidden md:table-cell">Cajero</TableHead>
                                 <TableHead className="hidden sm:table-cell">Fecha</TableHead>
                                 <TableHead className="hidden lg:table-cell">Origen</TableHead>
                                 <TableHead className="text-right">Total</TableHead>
@@ -120,9 +124,12 @@ export default function SalesPage() {
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell">
                                             {sale.sourceType === 'Manual'
-                                                ? `${getNameById(sale.sellerId, sellers)} / ${getNameById(sale.cashierId, cashiers)}`
+                                                ? getNameById(sale.sellerId, sellers)
                                                 : sale.sellerName || 'N/A'
                                             }
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell">
+                                             {sale.sourceType === 'Manual' ? getNameById(sale.cashierId, cashiers) : 'N/A'}
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">{sale.date}</TableCell>
                                         <TableCell className="hidden lg:table-cell">{sale.sourceType}</TableCell>
@@ -130,7 +137,7 @@ export default function SalesPage() {
                                     </TableRow>
                                      <CollapsibleContent asChild>
                                         <TableRow>
-                                            <TableCell colSpan={7} className="p-0">
+                                            <TableCell colSpan={8} className="p-0">
                                                 <div className="p-4 bg-muted/50">
                                                 <h4 className="font-semibold mb-2">Detalles de la Venta:</h4>
                                                 <Table>
