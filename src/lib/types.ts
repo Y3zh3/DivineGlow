@@ -62,3 +62,17 @@ export type Cashier = {
   name: string;
   password?: string;
 };
+
+export type SaleItem = OrderItem & {
+    category: ProductCategory;
+};
+
+export type Sale = {
+    id: string;
+    customerId: string;
+    sellerId: string;
+    cashierId: string;
+    date: string;
+    items: SaleItem[];
+    total: number;
+}

@@ -14,7 +14,8 @@ import {
   PlusSquare,
   FileBox,
   KeyRound,
-  DollarSign
+  DollarSign,
+  Receipt
 } from 'lucide-react';
 
 import {
@@ -57,6 +58,7 @@ export default function DashboardLayout({
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'seller', 'warehouse', 'cajero'] },
     { href: '/dashboard/pos', label: 'Punto de Venta', icon: PlusSquare, roles: ['admin', 'seller'] },
+    { href: '/dashboard/sales', label: 'Ventas', icon: Receipt, roles: ['admin'] },
     { href: '/dashboard/products', label: 'Productos', icon: Package, roles: ['admin', 'seller', 'warehouse'] },
     { href: '/dashboard/customers', label: 'Clientes', icon: Users, roles: ['admin', 'seller'] },
     { href: '/dashboard/orders', label: 'Pedidos', icon: ShoppingCart, roles: ['admin', 'seller', 'warehouse', 'cajero'] },
